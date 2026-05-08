@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CloudCore Apps | Next-Gen Mobile Studio</title>
+    <!-- Favicon & Logo Redesign: Sky & Cloud Emblem -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2387CEEB'/%3E%3Cstop offset='100%25' stop-color='%2342A5F5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='28' fill='url(%23grad)'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='white' font-weight='bold'%3E☁%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='28' fill='%2342A5F5'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='white'%3E☁%3C/text%3E%3C/svg%3E">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Three.js -->
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js" } }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #c7e9ff, #a0d4ff, #6db3f2);
+            color: #0a2a44;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 3D Canvas Background */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #eef7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-content {
+            text-align: center;
+            background: rgba(255,255,245,0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px 40px;
+            border-radius: 70px;
+            box-shadow: 0 20px 40px rgba(66, 165, 245, 0.25);
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(66, 165, 245, 0.2);
+            border-top: 4px solid #42A5F5;
+            border-radius: 50%;
+            animation: spin 0.8s ease infinite;
+            box-shadow: 0 0 15px rgba(66,165,245,0.5);
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .loader-text {
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            font-size: 1.2rem;
+            color: #2c7bd6;
+            background: transparent;
+        }
+
+        .site-wrapper {
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+        }
+
+        .site-wrapper.reveal {
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 80px;
+            margin-top: 24px;
+            padding: 12px 28px;
+            border: 1px solid rgba(255,255,250,0.7);
+            box-shadow: 0 12px 35px rgba(66, 165, 245, 0.15);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            background: linear-gradient(135deg, #fff, #87CEEB);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 5px rgba(66,165,245,0.4);
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #0a4b8a, #1E88E5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #0a3e6d;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #1E88E5;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-light {
+            background: rgba(66, 165, 245, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid #42A5F5;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #1E88E5;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-light:hover {
+            background: #42A5F5;
+            color: white;
+            box-shadow: 0 8px 20px rgba(66,165,245,0.5);
+            transform: scale(1.02);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 60px 0 50px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 8vw, 5rem);
+            font-weight: 800;
+            background: linear-gradient(145deg, #0E4D8C, #62B5F0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            color: #1b4972;
+            max-width: 680px;
+            margin: 0 auto 32px;
+            font-weight: 500;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-sky {
+            background: linear-gradient(105deg, #42A5F5, #6ec8ff);
+            border: none;
+            padding: 12px 34px;
+            border-radius: 50px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 8px 20px rgba(66,165,245,0.4);
+            transition: 0.2s;
+        }
+
+        .btn-primary-sky:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(66,165,245,0.6);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255,255,245,0.7);
+            backdrop-filter: blur(8px);
+            padding: 12px 28px;
+            border-radius: 90px;
+            border: 1px solid rgba(66,165,245,0.5);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1E88E5;
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            padding: 60px 0 40px;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .overline {
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            color: #1876d0;
+            font-weight: 600;
+        }
+
+        .portfolio-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #0b5394, #46a3f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+        }
+
+        .portfolio-tags {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 28px;
+            border: 1px solid rgba(66,165,245,0.5);
+        }
+
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(66,165,245,0.3);
+            padding-bottom: 24px;
+        }
+
+        .tag {
+            background: rgba(66,165,245,0.15);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            color: #0a4b8a;
+        }
+
+        .tag:hover, .tag.highlight {
+            background: #42A5F5;
+            color: white;
+        }
+
+        .tag.highlight {
+            box-shadow: 0 4px 12px rgba(66,165,245,0.4);
+        }
+
+        .popular-list h4 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: #0e5f9e;
+        }
+
+        .popular-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .popular-item:hover {
+            transform: translateX(6px);
+            color: #1E88E5;
+        }
+
+        /* App Cards - IMPROVED with fixed sizing and proper links */
+        .app-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        .app-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border-radius: 36px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(66,165,245,0.4);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 360px;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #42A5F5;
+            box-shadow: 0 25px 40px -12px rgba(66,165,245,0.3);
+        }
+
+        .app-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 16px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .app-icon-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 12px 18px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover .app-icon-img {
+            transform: scale(1.05);
+        }
+
+        .app-card h3 {
+            font-size: 1.3rem;
+            margin: 10px 0 8px;
+            color: #0a3a62;
+            font-weight: 700;
+        }
+
+        .app-description {
+            font-size: 0.85rem;
+            color: #4a6a8a;
+            margin: 8px 0 12px;
+            line-height: 1.45;
+            flex-grow: 1;
+        }
+
+        .rating {
+            margin: 10px 0 10px;
+        }
+
+        .rating i, .rating .fas {
+            color: #FFB74D;
+            margin-right: 2px;
+        }
+
+        .rating span {
+            margin-left: 8px;
+            color: #5a7a9a;
+            font-weight: 500;
+        }
+
+        .trending-tag {
+            background: #e2f0ff;
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #1E88E5;
+            margin-top: 8px;
+            align-self: flex-start;
+        }
+
+        .studio-showcase {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 48px;
+            margin: 40px 0;
+            padding: 48px 32px;
+            text-align: center;
+            border: 1px solid rgba(66,165,245,0.6);
+        }
+
+        .studio-showcase h2 {
+            font-size: 2rem;
+            color: #0d487d;
+        }
+
+        .studio-email {
+            font-weight: 700;
+            color: #1976D2;
+            font-size: 1.2rem;
+            margin-top: 16px;
+        }
+
+        /* Footer */
+        .footer-new {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            border-radius: 40px 40px 0 0;
+            margin-top: 60px;
+            padding: 50px 40px 35px;
+            border-top: 1px solid #9bc9ff;
+        }
+
+        .footer-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 50px;
+            margin-bottom: 45px;
+        }
+
+        .footer-brand-col {
+            flex: 1.2;
+            min-width: 240px;
+        }
+
+        .footer-brand-col .logo-area {
+            display: inline-flex;
+            margin-bottom: 18px;
+        }
+
+        .footer-brand-col p {
+            color: #2c5a85;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 280px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px;
+            flex: 2;
+            justify-content: flex-end;
+        }
+
+        .footer-links-column {
+            min-width: 150px;
+        }
+
+        .footer-links-column h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1E88E5;
+            margin-bottom: 22px;
+            letter-spacing: 0.05em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-links-column h4:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: #42A5F5;
+            border-radius: 2px;
+        }
+
+        .footer-links-column a {
+            display: block;
+            text-decoration: none;
+            color: #366e9e;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .footer-links-column a:hover {
+            color: #1976D2;
+            transform: translateX(5px);
+        }
+
+        .footer-contact-email {
+            font-weight: 600;
+            color: #0a5b9e !important;
+        }
+
+        .footer-contact-email i {
+            margin-right: 6px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(66, 165, 245, 0.25);
+            font-size: 0.75rem;
+            color: #4a7ca8;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        .footer-bottom-links a {
+            text-decoration: none;
+            color: #4a7ca8;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #1E88E5;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffffdd;
+            backdrop-filter: blur(12px);
+            color: #1E88E5;
+            padding: 10px 24px;
+            border-radius: 60px;
+            z-index: 2000;
+            opacity: 0;
+            font-weight: 700;
+            transition: 0.2s;
+            pointer-events: none;
+            border: 1px solid #42A5F5;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1024px) {
+            .portfolio-grid { grid-template-columns: 1fr; }
+            .footer-links { justify-content: flex-start; margin-top: 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; text-align: center; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .footer-grid { flex-direction: column; gap: 35px; }
+            .footer-links { justify-content: flex-start; gap: 40px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .toast-msg { white-space: normal; max-width: 90%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-container"></div>
+
+<div id="loaderOverlay" class="loader-overlay">
+    <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">CLOUDCORE APPS</div>
+    </div>
+</div>
+
+<div class="site-wrapper" id="siteWrapper">
+    <div class="container">
+        <nav class="navbar">
+            <a href="/" id="logoHomeLink" class="logo-area">
+                <span class="logo-icon">☁️</span>
+                <span class="brand">CloudCore Apps</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" id="navHome">Home</a>
+                <a href="/privacy-policy" id="navPrivacy">Privacy Policy</a>
+                <a href="/offer-terms" id="navTerms">Offer Terms</a>
+                <button class="btn-outline-light" id="ctaOurAppsBtn">Our Apps</button>
+            </div>
+        </nav>
+
+        <main>
+            <div id="homePage">
+                <section class="hero">
+                    <h1>CloudCore,<br>Precision Mobile.</h1>
+                    <div class="tagline">We craft finely-tuned mobile tools that feel weightless — every interaction refined, every feature intentional, built for clarity and speed.</div>
+                    <div class="hero-buttons">
+                        <button class="btn-primary-sky" id="exploreAppsBtn">Explore Studio</button>
+                        <button class="btn-outline-light" id="aboutStudioBtn">About CloudCore</button>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item"><div class="stat-number">12+</div><div class="stat-label">APPS SHIPPED</div></div>
+                        <div class="stat-item"><div class="stat-number">2M+</div><div class="stat-label">DOWNLOADS</div></div>
+                        <div class="stat-item"><div class="stat-number">4.8★</div><div class="stat-label">AVG RATING</div></div>
+                    </div>
+                </section>
+
+                <div class="portfolio">
+                    <div class="portfolio-header">
+                        <div class="overline">OUR PORTFOLIO</div>
+                        <h2>Tools designed to disappear</h2>
+                    </div>
+                    <div class="portfolio-grid">
+                        <div class="portfolio-tags">
+                            <div class="tag-group" id="filterTags">
+                                <div class="tag highlight" data-filter="all">ALL</div>
+                                <div class="tag" data-filter="popular">POPULAR</div>
+                                <div class="tag" data-filter="new">NEW</div>
+                                <div class="tag" data-filter="hot">HOT</div>
+                                <div class="tag" data-filter="trending">TRENDING</div>
+                            </div>
+                            <div class="popular-list">
+                                <h4>✨ Most Loved</h4>
+                                <div class="popular-item" data-app="SmartCast TV: Screen Mirroring"><span>SmartCast TV: Screen Mirroring</span> <span>★ 5.8k</span></div>
+                                <div class="popular-item" data-app="Smart switch : Copy My Data"><span>Smart switch : Copy My Data</span> <span>★ 3.2k</span></div>
+                                <div class="popular-item" data-app="All Document Reader: PDF, Word"><span>All Document Reader: PDF, Word</span> <span>★ 4.1k</span></div>
+                                <!-- <div class="popular-item" data-app="Invoice Maker"><span>Invoice Maker</span> <span>★ 4.5k</span></div> -->
+                                <!-- <div class="popular-item" data-app="Accurate Compass"><span>Accurate Compass</span> <span>★ 4.3k</span></div> -->
+                            </div>
+                        </div>
+
+                        <div class="app-cards" id="appCardsContainer">
+                            <!-- Cards will be populated by JavaScript with proper links -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="studio-showcase">
+                    <h2>Independent. Intentional. Cloud-driven.</h2>
+                    <p>CloudCore Apps is an independent design & engineering studio building fast, focused utilities. We value clarity, craft, and products that earn a permanent spot on your home screen — now reimagined with serene sky energy.</p>
+                    <div class="studio-email">support@cloudcoreapps.com</div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="footer-new">
+                    <div class="footer-grid">
+                        <div class="footer-brand-col">
+                            <a href="/" id="footerLogoHomeLink" class="logo-area">
+                                <span class="logo-icon">☁️</span>
+                                <span class="brand">CloudCore Apps</span>
+                            </a>
+                            <p>Building lightweight, powerful mobile tools – precision in your pocket.</p>
+                        </div>
+                        <div class="footer-links">
+                            <div class="footer-links-column">
+                                <h4>RESOURCES</h4>
+                                <a href="javascript:void(0)" id="footerResource1">Video Downloader Policy</a>
+                                <a href="javascript:void(0)" id="footerResource2">AI Logo Maker Policy</a>
+                                <a href="javascript:void(0)" id="footerResource3">Chatbot AI Policy</a>
+                                <a href="javascript:void(0)" id="footerResource4">Support Hub</a>
+                            </div>
+                            <div class="footer-links-column">
+                                <h4>COMPANY</h4>
+                                <a href="/" id="footerHomeLink">Home</a>
+                                <a href="/privacy-policy/" id="footerPrivacyLink">Privacy Policy</a>
+                                <a href="/offer-terms" id="footerTermsLink">Offer Terms</a>
+                                <a href="mailto:support@cloudcoreapps.com" class="footer-contact-email"><i class="fas fa-envelope"></i> support@cloudcoreapps.com</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-bottom">
+                        <span>© 2026 CloudCore Apps Studio. All rights reserved.</span>
+                    </div>
+                </footer>
+            </div>
+        </main>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script type="module">
+    import * as THREE from 'three';
+    
+    // 3D Scene Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xc7e9ff);
+    scene.fog = new THREE.FogExp2(0xc7e9ff, 0.008);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1, 14);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    // Particles
+    const particleCount = 1800;
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+        positions[i*3] = (Math.random() - 0.5) * 70;
+        positions[i*3+1] = (Math.random() - 0.5) * 45;
+        positions[i*3+2] = (Math.random() - 0.5) * 50 - 20;
+    }
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0xadd8ff, size: 0.09, transparent: true, opacity: 0.55 });
+    const particles = new THREE.Points(geom, particleMat);
+    scene.add(particles);
+    
+    // Floating spheres
+    const sphereGroup = [];
+    const colors = [0x9ec9ff, 0xb0daff, 0x87cefa];
+    for (let i = 0; i < 60; i++) {
+        const size = Math.random() * 0.18 + 0.08;
+        const sphereMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)], emissive: 0x4285f4, emissiveIntensity: 0.12 });
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12), sphereMat);
+        sphere.position.x = (Math.random() - 0.5) * 32;
+        sphere.position.y = (Math.random() - 0.5) * 20;
+        sphere.position.z = (Math.random() - 0.5) * 30 - 15;
+        scene.add(sphere);
+        sphereGroup.push(sphere);
+    }
+    
+    const ambientLight = new THREE.AmbientLight(0x6688aa);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(1, 2, 1);
+    scene.add(dirLight);
+    
+    let timeVal = 0;
+    function animate3D() {
+        requestAnimationFrame(animate3D);
+        timeVal += 0.004;
+        particles.rotation.y = timeVal * 0.08;
+        particles.rotation.x = Math.sin(timeVal * 0.2) * 0.1;
+        sphereGroup.forEach((s, idx) => {
+            s.position.y += Math.sin(timeVal + idx) * 0.002;
+            s.position.x += Math.cos(timeVal * 0.5 + idx) * 0.001;
+        });
+        camera.position.x = Math.sin(timeVal * 0.15) * 0.3;
+        camera.position.y = Math.cos(timeVal * 0.12) * 0.2;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+    }
+    animate3D();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // ========== APP DATABASE WITH ACTUAL STORE LINKS ==========
+    const appsDatabase = [
+        { 
+            name: "SmartCast TV: Screen Mirroring", 
+            category: "popular", 
+            rating: 4.5, 
+            reviews: "4.5k", 
+            link: "https://play.google.com/store/apps/details?id=com.tvcast.screenmirroring.smartcast.screenshare.smarttv", 
+            icon: "https://play-lh.googleusercontent.com/DVz5FtSzMTua1gTfmQGnPqzQGSk57mq7ffF7JvW_G5jm2eAKJmbvFCzp0kKY8qtZU3Y", 
+            desc: "Enjoy Screen Mirroring, Cast to TV and Screen Share with Wireless Display",
+            tag: "POPULAR"
+        },
+        { 
+            name: "Smart switch : Copy My Data", 
+            category: "new", 
+            rating: 4.3, 
+            reviews: "3.2k", 
+            link: "https://play.google.com/store/apps/details?id=com.smartswitch.filetransfer.datatransfer.easymover.phoneclone.copymydata", 
+            icon: "https://lh3.googleusercontent.com/7TIxHhUK6U08l32NLLASGYm7wcgLKuJxIpmt3kTvW9_J2CGlGXicxgnzk66glPsCnkIzTDEYpRzm-HWOU1kn", 
+            desc: "Move data quickly with SmartSwitch : Contacts, Videos, Photos, Files & Music.",
+            tag: "NEW"
+        },
+        { 
+            name: "All Document Reader: PDF, Word", 
+            category: "hot", 
+            rating: 4.9, 
+            reviews: "5.8k", 
+            link: "https://play.google.com/store/apps/details?id=com.document.reader.pdf.viewer.officepdfwordexcel.manager", 
+            icon: "https://play-lh.googleusercontent.com/pEu_YnK9tBAFf6dBNQ0yI2x427es8El0RoOcKs2FcQ0XpO3CP67VHFJX_gWfA72RH2A", 
+            desc: "Control any TV, projector, or IR device from your phone.",
+            tag: "HOT"
+        },
+        // { 
+        //     name: "Themes & Wallpapers", 
+        //     category: "trending popular", 
+        //     rating: 4.6, 
+        //     reviews: "4.1k", 
+        //     link: "https://play.google.com/store/apps/details?id=com.intangibleobject.energizedcolors", 
+        //     icon: "https://img.icons8.com/fluency/96/paint-palette.png", 
+        //     desc: "4K wallpapers, icon packs, and live themes daily updated.",
+        //     tag: "TRENDING"
+        // },
+        // { 
+        //     name: "Accurate Compass", 
+        //     category: "popular", 
+        //     rating: 4.4, 
+        //     reviews: "4.0k", 
+        //     link: "https://play.google.com/store/apps/details?id=com.gamma.compass", 
+        //     icon: "https://img.icons8.com/fluency/96/compass.png", 
+        //     desc: "Precision compass with GPS coordinates and altitude meter.",
+        //     tag: "POPULAR"
+        // },
+        // { 
+        //     name: "Live Camera", 
+        //     category: "trending", 
+        //     rating: 4.2, 
+        //     reviews: "3.9k", 
+        //     link: "https://play.google.com/store/apps/details?id=com.android.camera2", 
+        //     icon: "https://img.icons8.com/fluency/96/camera.png", 
+        //     desc: "High-quality camera filters & pro mode with real-time effects.",
+        //     tag: "TRENDING"
+        // },
+        // { 
+        //     name: "GPS Speedometer", 
+        //     category: "popular", 
+        //     rating: 4.7, 
+        //     reviews: "4.2k", 
+        //     link: "https://play.google.com/store/apps/details?id=com.gps.gpsspeedometer", 
+        //     icon: "https://img.icons8.com/fluency/96/speedometer.png", 
+        //     desc: "Real-time speed, trip meter, and HUD display.",
+        //     tag: "HOT"
+        // },
+        // { 
+        //     name: "Smart Printer", 
+        //     category: "utility", 
+        //     rating: 4.1, 
+        //     reviews: "3.7k", 
+        //     link: "https://play.google.com/store/apps/details?id=com.brother.mfc", 
+        //     icon: "https://img.icons8.com/fluency/96/printer.png", 
+        //     desc: "Print documents & photos wirelessly from any device.",
+        //     tag: "UTILITY"
+        // }
+    ];
+    
+    function generateStars(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalf = rating - fullStars >= 0.5;
+        let stars = '';
+        for (let i = 0; i < fullStars; i++) stars += '<i class="fas fa-star"></i>';
+        if (hasHalf) stars += '<i class="fas fa-star-half-alt"></i>';
+        const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+        for (let i = 0; i < emptyStars; i++) stars += '<i class="far fa-star"></i>';
+        return stars;
+    }
+    
+    function renderAppCards(filter = "all") {
+        const containerCards = document.getElementById("appCardsContainer");
+        if (!containerCards) return;
+        
+        let filteredApps = appsDatabase;
+        if (filter !== "all") {
+            filteredApps = appsDatabase.filter(app => app.category.includes(filter));
+        }
+        
+        containerCards.innerHTML = filteredApps.map(app => `
+            <div class="app-card" data-name="${app.name}" data-link="${app.link}">
+                <div class="app-icon-wrapper">
+                    <img class="app-icon-img" src="${app.icon}" alt="${app.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'24\' fill=\'%2342A5F5\'/%3E%3Ctext x=\'50\' y=\'68\' font-size=\'46\' text-anchor=\'middle\' fill=\'white\'%3E☁%3C/text%3E%3C/svg%3E'">
+                </div>
+                <h3>${app.name}</h3>
+                <div class="app-description">${app.desc}</div>
+                <div class="rating">
+                    ${generateStars(app.rating)}
+                    <span>${app.reviews}</span>
+                </div>
+                <div class="trending-tag">${app.tag}</div>
+            </div>
+        `).join('');
+        
+        // Add click listeners to open app store links
+        document.querySelectorAll('.app-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const link = card.dataset.link;
+                if (link) {
+                    window.open(link, '_blank', 'noopener,noreferrer');
+                    showToast(`🔗 Opening ${card.querySelector('h3')?.innerText} on Store`);
+                } else {
+                    showToast(`✨ Coming soon`);
+                }
+            });
+        });
+    }
+    
+    function showToast(msg) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2200);
+    }
+    
+    // Filter functionality
+    function initFilters() {
+        document.querySelectorAll('#filterTags .tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('#filterTags .tag').forEach(t => t.classList.remove('highlight'));
+                this.classList.add('highlight');
+                const filter = this.dataset.filter;
+                renderAppCards(filter);
+                showToast(`Filter: ${filter.toUpperCase()}`);
+            });
+        });
+        
+        // Popular items click - scroll to card
+        document.querySelectorAll('.popular-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const appName = item.dataset.app;
+                const targetCard = Array.from(document.querySelectorAll('.app-card')).find(card => card.dataset.name === appName);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetCard.style.transform = 'scale(1.02)';
+                    setTimeout(() => targetCard.style.transform = '', 400);
+                    showToast(`✨ ${appName}`);
+                } else {
+                    showToast(`✨ Check out our ${appName} app!`);
+                }
+            });
+        });
+    }
+    
+    // Navigation setup
+    // function setupNavLinks() {
+    //     const exploreBtn = document.getElementById('exploreAppsBtn');
+    //     const aboutBtn = document.getElementById('aboutStudioBtn');
+    //     const ourAppsBtn = document.getElementById('ctaOurAppsBtn');
+    //     const portfolioSection = document.querySelector('.portfolio');
+    //     const studioSection = document.querySelector('.studio-showcase');
+        
+    //     if (exploreBtn) {
+    //         exploreBtn.addEventListener('click', () => {
+    //             portfolioSection?.scrollIntoView({ behavior: 'smooth' });
+    //         });
+    //     }
+        
+    //     if (aboutBtn) {
+    //         aboutBtn.addEventListener('click', () => {
+    //             studioSection?.scrollIntoView({ behavior: 'smooth' });
+    //         });
+    //     }
+        
+    //     if (ourAppsBtn) {
+    //         ourAppsBtn.addEventListener('click', () => {
+    //             portfolioSection?.scrollIntoView({ behavior: 'smooth' });
+    //         });
+    //     }
+        
+    //     // Nav links
+    //     const navHome = document.getElementById('navHome');
+    //     const navPrivacy = document.getElementById('navPrivacy');
+    //     const navTerms = document.getElementById('navTerms');
+    //     const logoHome = document.getElementById('logoHomeLink');
+    //     const footerHome = document.getElementById('footerHomeLink');
+        
+    //     if (navHome) navHome.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    //     if (logoHome) logoHome.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    //     if (footerHome) footerHome.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    //     if (navPrivacy) navPrivacy.addEventListener('click', () => showToast('📜 Privacy Policy (demo)'));
+    //     if (navTerms) navTerms.addEventListener('click', () => showToast('📄 Offer Terms (demo)'));
+        
+    //     // Footer links
+    //     const footerPrivacy = document.getElementById('footerPrivacyLink');
+    //     const footerTerms = document.getElementById('footerTermsLink');
+    //     if (footerPrivacy) footerPrivacy.addEventListener('click', () => showToast('📜 Privacy Policy'));
+    //     if (footerTerms) footerTerms.addEventListener('click', () => showToast('📄 Offer Terms'));
+        
+    //     const resourceLinks = ['footerResource1', 'footerResource2', 'footerResource3', 'footerResource4'];
+    //     resourceLinks.forEach(id => {
+    //         const el = document.getElementById(id);
+    //         if (el) el.addEventListener('click', () => showToast('📄 Resource guide coming soon'));
+    //     });
+    // }
+    
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loaderOverlay');
+            if(loader) { loader.classList.add('fade-out'); setTimeout(() => loader.style.display = 'none', 800); }
+            document.getElementById('siteWrapper').classList.add('reveal');
+            renderAppCards("all");
+            initFilters();
+            setupNavLinks();
+        }, 900);
+    });
+</script>
+</body>
+</html>

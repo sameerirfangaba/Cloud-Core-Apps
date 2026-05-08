@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CloudCore Apps | Privacy Policy</title>
+    <!-- Favicon & Logo: Cloud Emblem -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2387CEEB'/%3E%3Cstop offset='100%25' stop-color='%2342A5F5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='28' fill='url(%23grad)'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='white' font-weight='bold'%3E☁%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='28' fill='%2342A5F5'/%3E%3Ctext x='50' y='72' font-size='52' text-anchor='middle' fill='white'%3E☁%3C/text%3E%3C/svg%3E">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Three.js -->
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js" } }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #c7e9ff, #a0d4ff, #6db3f2);
+            color: #0a2a44;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 3D Canvas Background - Sky/Cloud dynamic */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #eef7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-content {
+            text-align: center;
+            background: rgba(255,255,245,0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px 40px;
+            border-radius: 70px;
+            box-shadow: 0 20px 40px rgba(66, 165, 245, 0.25);
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(66, 165, 245, 0.2);
+            border-top: 4px solid #42A5F5;
+            border-radius: 50%;
+            animation: spin 0.8s ease infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .loader-text {
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            font-size: 1.2rem;
+            color: #2c7bd6;
+        }
+
+        .site-wrapper {
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+        }
+
+        .site-wrapper.reveal { opacity: 1; }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Glassmorphism Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 80px;
+            margin-top: 24px;
+            padding: 12px 28px;
+            border: 1px solid rgba(255,255,250,0.7);
+            box-shadow: 0 12px 35px rgba(66, 165, 245, 0.15);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logo-icon { font-size: 32px; background: linear-gradient(135deg, #fff, #87CEEB); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .brand { font-weight: 800; font-size: 1.6rem; background: linear-gradient(135deg, #0a4b8a, #1E88E5); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.02em; }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #0a3e6d;
+            transition: 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #1E88E5; }
+
+        .btn-outline-light {
+            background: rgba(66, 165, 245, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid #42A5F5;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #1E88E5;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .btn-outline-light:hover {
+            background: #42A5F5;
+            color: white;
+            box-shadow: 0 8px 20px rgba(66,165,245,0.5);
+            transform: scale(1.02);
+        }
+
+        /* Privacy Policy Layout */
+        .privacy-header {
+            margin: 40px 0 30px;
+            text-align: center;
+        }
+        .privacy-header h1 {
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 800;
+            background: linear-gradient(145deg, #0E4D8C, #62B5F0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .privacy-header p {
+            color: #1b4972;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .privacy-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+            margin: 40px 0 60px;
+        }
+
+        /* Sticky Sidebar */
+        .policy-sidebar {
+            position: sticky;
+            top: 30px;
+            align-self: start;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 24px 20px;
+            border: 1px solid rgba(66,165,245,0.5);
+            transition: transform 0.2s;
+        }
+        .policy-sidebar:hover { transform: translateY(-5px); border-color: #42A5F5; }
+        .policy-sidebar h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #1E88E5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-nav { list-style: none; }
+        .sidebar-nav li { margin-bottom: 14px; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #1f5a8e;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            padding: 6px 10px;
+            border-radius: 40px;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active-side {
+            background: rgba(66,165,245,0.2);
+            color: #1976D2;
+            transform: translateX(6px);
+        }
+        .section-number {
+            font-weight: 700;
+            color: #42A5F5;
+            min-width: 32px;
+        }
+
+        /* Main content cards */
+        .privacy-content {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        .policy-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border-radius: 36px;
+            padding: 28px 30px;
+            border: 1px solid rgba(66,165,245,0.4);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+        }
+        .policy-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #42A5F5;
+            box-shadow: 0 25px 40px -12px rgba(66,165,245,0.3);
+        }
+        .card-title {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid #42A5F5;
+            padding-left: 18px;
+        }
+        .card-title h2 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #0a3a62;
+        }
+        .policy-card p {
+            color: #1f4a6e;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .info-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .info-badge {
+            background: rgba(66,165,245,0.15);
+            border: 1px solid rgba(66,165,245,0.4);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0e5f9e;
+            transition: all 0.2s;
+        }
+        .info-badge:hover {
+            background: #42A5F5;
+            color: white;
+            transform: scale(1.02);
+        }
+        .third-party-logos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .third-party-item {
+            background: rgba(0,0,0,0.05);
+            backdrop-filter: blur(4px);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #0a4b8a;
+        }
+
+        /* Footer - Same as Home Page */
+        .footer-new {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            border-radius: 40px 40px 0 0;
+            margin-top: 60px;
+            padding: 50px 40px 35px;
+            border-top: 1px solid #9bc9ff;
+        }
+
+        .footer-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 50px;
+            margin-bottom: 45px;
+        }
+
+        .footer-brand-col {
+            flex: 1.2;
+            min-width: 240px;
+        }
+
+        .footer-brand-col .logo-area {
+            display: inline-flex;
+            margin-bottom: 18px;
+        }
+
+        .footer-brand-col p {
+            color: #2c5a85;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 280px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px;
+            flex: 2;
+            justify-content: flex-end;
+        }
+
+        .footer-links-column {
+            min-width: 150px;
+        }
+
+        .footer-links-column h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1E88E5;
+            margin-bottom: 22px;
+            letter-spacing: 0.05em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-links-column h4:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: #42A5F5;
+            border-radius: 2px;
+        }
+
+        .footer-links-column a {
+            display: block;
+            text-decoration: none;
+            color: #366e9e;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .footer-links-column a:hover {
+            color: #1976D2;
+            transform: translateX(5px);
+        }
+
+        .footer-contact-email {
+            font-weight: 600;
+            color: #0a5b9e !important;
+        }
+
+        .footer-contact-email i {
+            margin-right: 6px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(66, 165, 245, 0.25);
+            font-size: 0.75rem;
+            color: #4a7ca8;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        .footer-bottom-links a {
+            text-decoration: none;
+            color: #4a7ca8;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #1E88E5;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffffdd;
+            backdrop-filter: blur(12px);
+            color: #1E88E5;
+            padding: 10px 24px;
+            border-radius: 60px;
+            z-index: 2000;
+            opacity: 0;
+            font-weight: 700;
+            transition: 0.2s;
+            pointer-events: none;
+            border: 1px solid #42A5F5;
+        }
+
+        @media (max-width: 900px) {
+            .privacy-grid { grid-template-columns: 1fr; }
+            .policy-sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .toast-msg { white-space: normal; max-width: 90%; }
+            .footer-links { justify-content: flex-start; margin-top: 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; text-align: center; }
+            .nav-links { justify-content: center; width: 100%; }
+            .footer-grid { flex-direction: column; gap: 35px; }
+            .footer-links { justify-content: flex-start; gap: 40px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+        .fade-up { animation: fadeUp 0.6s ease-out backwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+<div id="loaderOverlay" class="loader-overlay">
+    <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">CLOUDCORE APPS</div>
+    </div>
+</div>
+
+<div class="site-wrapper" id="siteWrapper">
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a href="#" id="logoHomeLink" class="logo-area">
+                <span class="logo-icon">☁️</span>
+                <span class="brand">CloudCore Apps</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" id="navHome">Home</a>
+                <a href="/privacy-policy/" id="navPrivacy" class="active">Privacy Policy</a>
+                <a href="/offer-terms/" id="navTerms">Offer Terms</a>
+                <button class="btn-outline-light" id="ctaOurAppsBtn">Our Apps</button>
+            </div>
+        </nav>
+
+        <main>
+            <div class="privacy-header fade-up">
+                <h1>Privacy Policy</h1>
+                <p>Last Updated: MAY 2026 | Transparency you can trust</p>
+            </div>
+
+            <div class="privacy-grid">
+                <!-- Left Sticky Sidebar -->
+                <aside class="policy-sidebar fade-up">
+                    <h3><i class="fas fa-compass"></i> On This Page</h3>
+                    <ul class="sidebar-nav" id="sidebarNav">
+                        <li><a href="#section01"><span class="section-number">01</span> Overview</a></li>
+                        <li><a href="#section02"><span class="section-number">02</span> Not Collected</a></li>
+                        <li><a href="#section03"><span class="section-number">03</span> Info Collected</a></li>
+                        <li><a href="#section04"><span class="section-number">04</span> Third-Party</a></li>
+                        <li><a href="#section05"><span class="section-number">05</span> Permissions</a></li>
+                        <li><a href="#section06"><span class="section-number">06</span> Purchases</a></li>
+                        <li><a href="#section07"><span class="section-number">07</span> Cookies</a></li>
+                        <li><a href="#section08"><span class="section-number">08</span> Children</a></li>
+                        <li><a href="#section09"><span class="section-number">09</span> Security</a></li>
+                        <li><a href="#section10"><span class="section-number">10</span> Opt-Out</a></li>
+                        <li><a href="#section11"><span class="section-number">11</span> Changes</a></li>
+                        <li><a href="#section12"><span class="section-number">12</span> Log Data</a></li>
+                        <li><a href="#section13"><span class="section-number">13</span> Retention</a></li>
+                        <li><a href="#section14"><span class="section-number">14</span> User Rights</a></li>
+                        <li><a href="#section15"><span class="section-number">15</span> Ext. Links</a></li>
+                        <li><a href="#section16"><span class="section-number">16</span> Disclaimer</a></li>
+                        <li><a href="#section17"><span class="section-number">17</span> Contact</a></li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content Cards -->
+                <div class="privacy-content">
+                    <div id="section01" class="policy-card fade-up">
+                        <div class="card-title"><h2>Overview</h2></div>
+                        <p>This Privacy Policy explains how we collect, use, and protect information when you use our mobile applications. We do not use or share your information with anyone except as described in this Policy. By installing or using the app, you agree to these terms.</p>
+                        <p>This policy applies to all applications published under the CloudCore Apps developer account: Smart Switch, Universal TV Remote, Smart Printer App, Smart Recovery App, Docs Viewer App, Speedometer, Live Camera App, Themes & Wallpapers, Compass App, Invoice Maker, Voice Changer, GPS Tracker.</p>
+                    </div>
+                    <div id="section02" class="policy-card fade-up">
+                        <div class="card-title"><h2>Information We Do Not Collect</h2></div>
+                        <p>Our apps are designed to operate with maximum data staying on your device. We do not directly collect, store, or transmit: Personal identity information, Contact details, Precise location data, Race/ethnicity/religious beliefs, Health/genetic/biometric data, Political opinions or trade union membership.</p>
+                    </div>
+                    <div id="section03" class="policy-card fade-up">
+                        <div class="card-title"><h2>Information the App Collects</h2></div>
+                        <p>To provide essential features, the app may request access to certain device functionalities. We may use permissions locally:</p>
+                        <div class="info-grid">
+                            <span class="info-badge">Storage Access</span><span class="info-badge">Photos & Media</span><span class="info-badge">Notifications</span>
+                            <span class="info-badge">Device Info</span><span class="info-badge">Bluetooth</span><span class="info-badge">Nearby Devices</span>
+                            <span class="info-badge">Device ID</span><span class="info-badge">Phone State</span><span class="info-badge">Network State</span>
+                            <span class="info-badge">Camera</span><span class="info-badge">WiFi Info</span><span class="info-badge">Crash Logs</span>
+                            <span class="info-badge">App Usage</span><span class="info-badge">Approx. Location</span><span class="info-badge">Push Notifications</span>
+                            <span class="info-badge">Installed Apps</span><span class="info-badge">Call Log & Contacts</span><span class="info-badge">Calendar</span>
+                        </div>
+                    </div>
+                    <div id="section04" class="policy-card fade-up">
+                        <div class="card-title"><h2>Third-Party Services</h2></div>
+                        <p>Our apps use trusted third-party SDKs for analytics, advertising, and stability.</p>
+                        <div class="third-party-logos">
+                            <span class="third-party-item">Google Play Services</span>
+                            <span class="third-party-item">AdMob</span>
+                            <span class="third-party-item">Google Analytics</span>
+                            <span class="third-party-item">Firebase Crashlytics</span>
+                        </div>
+                    </div>
+                    <div id="section05" class="policy-card fade-up">
+                        <div class="card-title"><h2>Permissions</h2></div>
+                        <p>Permissions are requested only when a specific feature requires them.</p>
+                        <div class="info-grid">
+                            <span class="info-badge">Wi-Fi/Network</span><span class="info-badge">Camera</span><span class="info-badge">Webpage Access</span>
+                            <span class="info-badge">Notifications</span><span class="info-badge">Foreground Service</span><span class="info-badge">Read/Write Storage</span>
+                            <span class="info-badge">Internet Access</span><span class="info-badge">Microphone</span><span class="info-badge">Bluetooth</span>
+                            <span class="info-badge">Nearby Devices</span><span class="info-badge">Usage Access</span>
+                        </div>
+                    </div>
+                    <div id="section06" class="policy-card"><div class="card-title"><h2>In-App Purchases</h2></div><p>Purchases are processed securely via Google Play Billing. We never store credit card numbers.</p></div>
+                    <div id="section07" class="policy-card"><div class="card-title"><h2>Cookies & Similar Technologies</h2></div><p>This app does not use browser cookies directly. Third-party SDKs may use anonymous identifiers.</p></div>
+                    <div id="section08" class="policy-card"><div class="card-title"><h2>Children's Privacy</h2></div><p>Not intended for children under 13. Contact us if any personal information from a child is discovered.</p></div>
+                    <div id="section09" class="policy-card"><div class="card-title"><h2>Data Security</h2></div><p>We implement physical, technical, and administrative security measures to protect information.</p></div>
+                    <div id="section10" class="policy-card"><div class="card-title"><h2>Opt-Out Rights</h2></div><p>Stop all data collection by uninstalling the app.</p></div>
+                    <div id="section11" class="policy-card"><div class="card-title"><h2>Changes to This Policy</h2></div><p>Updates will be posted on this page with a revised effective date.</p></div>
+                    <div id="section12" class="policy-card"><div class="card-title"><h2>Log Data</h2></div><p>In case of an error we collect data like IP address, device name, OS version through third-party products.</p></div>
+                    <div id="section13" class="policy-card"><div class="card-title"><h2>Data Retention & Deletion</h2></div><p>Third-party data is retained under their policies. Contact us for requests.</p></div>
+                    <div id="section14" class="policy-card"><div class="card-title"><h2>User Rights & Controls</h2></div><p>Access, deletion, or limitation rights depending on your region. We assist with third-party providers.</p></div>
+                    <div id="section15" class="policy-card"><div class="card-title"><h2>Links to Other Sites</h2></div><p>We are not responsible for external sites or ads.</p></div>
+                    <div id="section16" class="policy-card"><div class="card-title"><h2>Trademark & Affiliation Disclaimer</h2></div><p>CloudCore Apps is independent and not affiliated with Google, Samsung, Apple, etc.</p></div>
+                    <div id="section17" class="policy-card"><div class="card-title"><h2>Contact & Support</h2></div><p>Email Support: <strong style="color:#1E88E5;">hello@cloudcoreapps.com</strong></p></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer - Same as Home Page -->
+        <footer class="footer-new">
+            <div class="footer-grid">
+                <div class="footer-brand-col">
+                    <a href="#" id="footerLogoHomeLink" class="logo-area">
+                        <span class="logo-icon">☁️</span>
+                        <span class="brand">CloudCore Apps</span>
+                    </a>
+                    <p>Building lightweight, powerful mobile tools – precision in your pocket.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h4>RESOURCES</h4>
+                        <a href="#" id="footerResource1">Video Downloader Policy</a>
+                        <a href="#" id="footerResource2">AI Logo Maker Policy</a>
+                        <a href="#" id="footerResource3">Chatbot AI Policy</a>
+                        <a href="#" id="footerResource4">Support Hub</a>
+                    </div>
+                    <div class="footer-links-column">
+                        <h4>COMPANY</h4>
+                        <a href="/" id="footerHomeLink">Home</a>
+                        <a href="/privacy-policy/" id="footerPrivacyLink">Privacy Policy</a>
+                        <a href="/offer-terms/" id="footerTermsLink">Offer Terms</a>
+                        <a href="mailto:hello@cloudcoreapps.com" class="footer-contact-email"><i class="fas fa-envelope"></i> hello@cloudcoreapps.com</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 CloudCore Apps Studio. All rights reserved.</span>
+            </div>
+        </footer>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script type="module">
+    import * as THREE from 'three';
+    
+    // 3D Scene Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xc7e9ff);
+    scene.fog = new THREE.FogExp2(0xc7e9ff, 0.008);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1, 14);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    // Particles
+    const particleCount = 1800;
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+        positions[i*3] = (Math.random() - 0.5) * 70;
+        positions[i*3+1] = (Math.random() - 0.5) * 45;
+        positions[i*3+2] = (Math.random() - 0.5) * 50 - 20;
+    }
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0xadd8ff, size: 0.09, transparent: true, opacity: 0.55 });
+    const particles = new THREE.Points(geom, particleMat);
+    scene.add(particles);
+    
+    // Floating spheres
+    const sphereGroup = [];
+    const colors = [0x9ec9ff, 0xb0daff, 0x87cefa];
+    for (let i = 0; i < 60; i++) {
+        const size = Math.random() * 0.18 + 0.08;
+        const sphereMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*colors.length)], emissive: 0x4285f4, emissiveIntensity: 0.12 });
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12), sphereMat);
+        sphere.position.x = (Math.random() - 0.5) * 32;
+        sphere.position.y = (Math.random() - 0.5) * 20;
+        sphere.position.z = (Math.random() - 0.5) * 30 - 15;
+        scene.add(sphere);
+        sphereGroup.push(sphere);
+    }
+    
+    const ambientLight = new THREE.AmbientLight(0x6688aa);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(1, 2, 1);
+    scene.add(dirLight);
+    
+    let timeVal = 0;
+    function animate3D() {
+        requestAnimationFrame(animate3D);
+        timeVal += 0.004;
+        particles.rotation.y = timeVal * 0.08;
+        particles.rotation.x = Math.sin(timeVal * 0.2) * 0.1;
+        sphereGroup.forEach((s, idx) => {
+            s.position.y += Math.sin(timeVal + idx) * 0.002;
+            s.position.x += Math.cos(timeVal * 0.5 + idx) * 0.001;
+        });
+        camera.position.x = Math.sin(timeVal * 0.15) * 0.3;
+        camera.position.y = Math.cos(timeVal * 0.12) * 0.2;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+    }
+    animate3D();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loaderOverlay');
+            if(loader) { loader.classList.add('fade-out'); setTimeout(() => loader.style.display = 'none', 800); }
+            document.getElementById('siteWrapper').classList.add('reveal');
+        }, 900);
+        initSidebarScroll();
+        initNavLinks();
+    });
+    
+    function showToast(msg) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2200);
+    }
+    
+    function initSidebarScroll() {
+        const links = document.querySelectorAll('.sidebar-nav a');
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                links.forEach(l => l.classList.remove('active-side'));
+                link.classList.add('active-side');
+            });
+        });
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('.policy-card[id]').forEach(section => {
+                const sectionTop = section.offsetTop - 150;
+                if(pageYOffset >= sectionTop) current = section.getAttribute('id');
+            });
+            links.forEach(link => {
+                link.classList.remove('active-side');
+                if(link.getAttribute('href') === '#'+current) link.classList.add('active-side');
+            });
+        });
+    }
+</script>
+</body>
+</html>
